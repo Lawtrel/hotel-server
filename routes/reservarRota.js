@@ -1,16 +1,38 @@
 const express = require('express');
 const rotas = express.Router();
+auth = require('../middleware/authMiddleware');
 const Reservar = require('../models/Reservar');
+const authMiddleware = require('../middleware/authMiddleware');
 
 //Api criar nova reserva
-rotas.post('/reservar', async( req, res) => {
-    const {name, nSala, checkInData, checkOutData} = req.body;
+rotas.post('/reservar',authMiddleware, async( req, res) => {
+    const { name, checkInDate, checkOutDate, guests } = req.body;
+
+    // Validações no servidor
+    if (!name || !checkInDate || !checkOutDate || !guests) {
+        return res.status(400).json({ message: 'Preencha todos os campos corretamente.' });
+    }
+
+    if (new Date(checkInDate) >= new Date(checkOutDate)) {
+        return res.status(400).json({ message: 'A data de check-out deve ser posterior à data de check-in.' });
+    }
+
     try {
-        const novaReserva = new Reservar({ name, nSala, checkInData, checkOutData});
-        await novaReserva.save();
-        res.json(novaReserva);
+        // Criação da reserva no banco de dados
+        const newReservation = new Reservar({
+            userId: req.user.id, // Associar a reserva ao usuário autenticado
+            name,
+            checkInDate,
+            checkOutDate,
+            guests,
+        });
+
+        await newReservation.save();
+
+        return res.status(201).json({ message: 'Reserva criada com sucesso!', reservation: newReservation });
     } catch (error) {
-        res.status(500).json({ error: 'Erro ao fazer a reserva', details: error.message});
+        console.error('Erro ao criar reserva:', error);
+        return res.status(500).json({ message: 'Erro ao processar a reserva. Tente novamente mais tarde.' });
     }
 });
 
