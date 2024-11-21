@@ -6,7 +6,7 @@ const Reserva = require('../models/Reservar');
 rotas.post('/salas', async (req, res) => {
     const { nSala, tipoSala } = req.body;
     try {
-        const novaSala = new Salas({ nSala, tipoSala });
+        const novaSala = new Salas({ nSala, tipoSala, disponivel: true });
         await novaSala.save();
         res.status(201).json(novaSala);
     } catch (error) {
@@ -51,23 +51,6 @@ rotas.get('/salas-disponivel', async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Erro ao buscar quartos disponíveis', details: error.message });
-    }
-});
-
-// Atualizar disponibilidade de uma sala
-rotas.put('/salas/:id', async (req, res) => {
-    const { disponivel } = req.body;
-    try {
-        const sala = await Salas.findById(req.params.id);
-        if (sala) {
-            sala.disponivel = disponivel;
-            await sala.save();
-            res.json(sala);
-        } else {
-            res.status(404).json({ error: 'Sala não encontrada' });
-        }
-    } catch (error) {
-        res.status(500).json({ error: 'Erro ao atualizar a sala', details: error.message });
     }
 });
 
