@@ -4,6 +4,7 @@ const authMiddleware = require('../middleware/authMiddleware');
 const Reservar = require('../models/Reservar');
 const Salas = require('../models/Salas');
 
+//Rota para reservar
 rotas.post('/reservar', authMiddleware, async (req, res) => {
 
     try {
@@ -24,6 +25,9 @@ rotas.post('/reservar', authMiddleware, async (req, res) => {
         });
         await reserva.save();
 
+        // Atualizar a disponibilidade da sala
+        await Salas.findByIdAndUpdate(reserva.roomId, { disponivel: false});
+
         res.status(201).json(reserva);
     } catch (error) {
         console.error(error);
@@ -31,11 +35,34 @@ rotas.post('/reservar', authMiddleware, async (req, res) => {
     }
 });
 
+// Rota para desfazer a reserva
+rotas.post('/desfazer-reserva/:id', authMiddleware, async (req, res) => {
+    try {
+        const reservaId = req.params.id;
+        const reserva = await Reservar.findById(reservaId);
+
+        if (!reserva) {
+            return res.status(404).json({ message: 'Reserva não encontrada' });
+        }
+
+        // Atualizar a disponibilidade da sala
+        await Salas.findByIdAndUpdate(reserva.roomId, { disponivel: true });
+
+        // Remover a reserva
+        await Reservar.findByIdAndDelete(reservaId);
+
+        res.status(200).json({ message: 'Reserva desfeita com sucesso' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Erro ao desfazer a reserva', details: error.message });
+    }
+});
+
 //Listar todas as reservas
 rotas.get('/reservas', authMiddleware, async (req, res) => {
     const userId = req.user._id; // Certifique-se de que `req.user` contém o ID do usuário autenticado
     try {
-        const reservas = await Reservar.find({ userId})
+        const reservas = await Reservar.find({userId})
             .populate('roomId');
         res.json(reservas);
     } catch (error) {
