@@ -36,7 +36,7 @@ rotas.post('/reservar', authMiddleware, async (req, res) => {
 });
 
 // Rota para desfazer a reserva
-rotas.post('/desfazer-reserva/:id', authMiddleware, async (req, res) => {
+rotas.delete('/desfazer-reserva/:id', authMiddleware, async (req, res) => {
     try {
         const reservaId = req.params.id;
         const reserva = await Reservar.findById(reservaId);
@@ -60,13 +60,13 @@ rotas.post('/desfazer-reserva/:id', authMiddleware, async (req, res) => {
 
 //Listar todas as reservas
 rotas.get('/reservas', authMiddleware, async (req, res) => {
-    const userId = req.user._id; // Certifique-se de que `req.user` contém o ID do usuário autenticado
+    const reservaId = req.user._id; // Certifique-se de que `req.user` contém o ID do usuário autenticado
     try {
-        const reservas = await Reservar.find({userId})
-            .populate('roomId');
+        const reservas = await Reservar.find({reservaId})
         res.json(reservas);
+        console.log(reservas);
     } catch (error) {
-        res.status(500).json({ error: 'Erro ao buscar as reservas'});
+        res.status(500).json({ error: 'Erro ao buscar as reservas.rota'});
     }
 });
   

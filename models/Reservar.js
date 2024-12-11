@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const ReservarSchema = new mongoose.Schema({
+    reservaId:  { type: mongoose.Schema.Types.ObjectId, ref: 'Reser'},
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true},
     roomId: { type: mongoose.Schema.Types.ObjectId, ref: 'Salas', required: true},
     name: { type: String, required: true},

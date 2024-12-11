@@ -2,6 +2,7 @@ const express = require('express');
 const rotas = express.Router();
 const Salas = require('../models/Salas');
 const Reserva = require('../models/Reservar');
+
 // Criar uma nova sala
 rotas.post('/salas', async (req, res) => {
     const { nSala, tipoSala } = req.body;
